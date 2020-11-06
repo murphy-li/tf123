@@ -1,5 +1,7 @@
 import tensorflow as tf
 import matplotlib.pyplot as plt
+import numpy as np
+
 
 # 导入数据
 (train_images, train_labels), (test_images, test_labels) = tf.keras.datasets.fashion_mnist.load_data()
@@ -38,3 +40,26 @@ for i in range(25):
     plt.imshow(train_images[i], cmap=plt.cm.binary)
     plt.xlabel(class_names[train_labels[i]])
 plt.show()
+
+# 构建神经网络需要先配置模型的层，然后再编译模型。
+# 设置层
+model = tf.keras.Sequential([
+    tf.keras.layers.Flatten(input_shape=(28, 28)),
+    tf.keras.layers.Dense(128, activation='relu'),
+    tf.keras.layers.Dense(10)
+])
+# 编译模型
+model.compile(optimizer='adam',
+              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+              metrics=['accuracy'])
+# 训练模型
+model.fit(train_images, train_labels, epochs=10)
+test_loss, test_acc = model.evaluate(test_images,  test_labels, verbose=2)
+print('\nTest accuracy:', test_acc)
+
+# 进行预测
+probability_model = tf.keras.Sequential([model,
+                                         tf.keras.layers.Softmax()])
+predictions = probability_model.predict(test_images)
+print(predictions[0])
+print(np.argmax(predictions[0]), test_labels[0])
